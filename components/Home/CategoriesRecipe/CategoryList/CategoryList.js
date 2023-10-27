@@ -7,6 +7,7 @@ import { colors } from "../../../../assets/constants/colors";
 
 const CategoryItem = ({ category, paddingRight, isActive }) => {
   const dispatch = useDispatch();
+
   const onPress = () => {
     dispatch(updateActiveCategories(category.strCategory));
   };

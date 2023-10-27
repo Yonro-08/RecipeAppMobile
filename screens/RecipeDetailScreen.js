@@ -1,16 +1,23 @@
-import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import Icon1 from "react-native-vector-icons/FontAwesome5";
-import YoutubePlayer from "react-native-youtube-iframe";
 
-import { useEffect, useState } from "react";
-import { getRecipeById } from "../lib/getRecipeById";
+import { useEffect } from "react";
 import CookieList from "../components/RecipeDetail/components/CookieList/CookieList";
-import WebView from "react-native-webview";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchRecipe } from "../store/recipeSlice";
 
 const RecipeDetailScreen = ({ route }) => {
   const { id } = route.params;
-  const [recipe, setRecipe] = useState([]);
+  const dispatch = useDispatch();
+  const { recipe, loaded } = useSelector((state) => state.recipe);
 
   const cookiesStatistic = [
     {
@@ -35,62 +42,83 @@ const RecipeDetailScreen = ({ route }) => {
   ];
 
   useEffect(() => {
-    (async () => {
-      const data = await getRecipeById(id);
-      setRecipe(data.meals[0]);
-    })();
-  });
+    if (id) {
+      dispatch(fetchRecipe(id));
+    }
+  }, [id]);
 
   return (
-    <ScrollView>
-      <View style={styles.imageContainer}>
-        <Image source={{ uri: recipe?.strMealThumb }} style={styles.image} />
-      </View>
-      <View style={styles.container}>
-        <Text style={styles.title}>{recipe?.strMeal}</Text>
-        <Text style={styles.subtitle}>{recipe?.strArea}</Text>
-        <View style={styles.cards}>
-          {cookiesStatistic.map((item, index) => {
-            return <CookieList key={index} item={item} />;
-          })}
+    <>
+      {loaded ? (
+        <ScrollView>
+          <View style={styles.imageContainer}>
+            <Image
+              source={{ uri: recipe?.strMealThumb }}
+              style={styles.image}
+            />
+          </View>
+          <View style={styles.container}>
+            <Text style={styles.title}>{recipe?.strMeal}</Text>
+            <Text style={styles.subtitle}>{recipe?.strArea}</Text>
+            <View style={styles.cards}>
+              {cookiesStatistic.map((item, index) => {
+                return <CookieList key={index} item={item} />;
+              })}
+            </View>
+            <View style={styles.ingredients}>
+              <Text
+                style={{ marginVertical: 10, fontWeight: "700", fontSize: 20 }}
+              >
+                Ingredients
+              </Text>
+              {[...Array(20).keys()].map((index) => {
+                if (recipe[`strIngredient${index + 1}`]) {
+                  return (
+                    <View key={index} style={styles.ingredientContainer}>
+                      <View style={styles.orangeDot} />
+                      <Text style={{ fontWeight: "700" }}>
+                        {recipe[`strMeasure${index + 1}`]}
+                      </Text>
+                      <Text>{recipe[`strIngredient${index + 1}`]}</Text>
+                    </View>
+                  );
+                }
+              })}
+            </View>
+            <View style={{ marginVertical: 10 }}>
+              <Text
+                style={{ fontSize: 20, fontWeight: "700", marginVertical: 10 }}
+              >
+                Instructions
+              </Text>
+              <Text style={{ textAlign: "justify" }}>
+                {recipe?.strInstructions}
+              </Text>
+            </View>
+          </View>
+        </ScrollView>
+      ) : (
+        <View style={styles.loading}>
+          <ActivityIndicator
+            size={100}
+            color="#0bb3b2"
+            style={{ backgroundColor: "transparent" }}
+          />
         </View>
-        <View style={styles.ingredients}>
-          <Text style={{ marginVertical: 10, fontWeight: "700", fontSize: 20 }}>
-            Ingredients
-          </Text>
-          {[...Array(20).keys()].map((index) => {
-            if (recipe[`strIngredient${index + 1}`]) {
-              return (
-                <View key={index} style={styles.ingredientContainer}>
-                  <View style={styles.orangeDot} />
-                  <Text style={{ fontWeight: "700" }}>
-                    {recipe[`strMeasure${index + 1}`]}
-                  </Text>
-                  <Text>{recipe[`strIngredient${index + 1}`]}</Text>
-                </View>
-              );
-            }
-          })}
-        </View>
-        <View style={{ marginVertical: 10 }}>
-          <Text style={{ fontSize: 20, fontWeight: "700", marginVertical: 10 }}>
-            Instructions
-          </Text>
-          <Text style={{ textAlign: "justify" }}>
-            {recipe?.strInstructions}
-          </Text>
-        </View>
-        {/* <View>
-          <WebView />
-        </View> */}
-      </View>
-    </ScrollView>
+      )}
+    </>
   );
 };
 
 export default RecipeDetailScreen;
 
 const styles = StyleSheet.create({
+  loading: {
+    flex: 1,
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+  },
   imageContainer: {
     width: "100%",
     height: "auto",

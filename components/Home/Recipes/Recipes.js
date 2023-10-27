@@ -4,8 +4,7 @@ import RecipeList from "./RecipeList/RecipeList";
 import { useSelector } from "react-redux";
 
 const Recipes = ({ searchValue }) => {
-  const { recipes } = useSelector((state) => state.recipes);
-  const recipesLoaded = useSelector((state) => state.recipes.loaded);
+  const { recipes, loaded } = useSelector((state) => state.recipes);
 
   const newRecipes = [...recipes];
 
@@ -17,7 +16,7 @@ const Recipes = ({ searchValue }) => {
     <View style={styles.container}>
       <Text style={styles.title}>Recipes</Text>
       <View style={styles.cards}>
-        {recipesLoaded ? (
+        {loaded ? (
           filterRecipes.map((recipe) => {
             return (
               <RecipeList

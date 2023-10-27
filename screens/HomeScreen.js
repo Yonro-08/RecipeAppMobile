@@ -13,7 +13,7 @@ const HomeScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView>
+      <ScrollView showsVerticalScrollIndicator={false}>
         <HeaderHome />
         <TitleHome />
         <FormHome setSearchValue={setSearchValue} />
